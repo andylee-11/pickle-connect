@@ -5,113 +5,127 @@ import { signInWithPopup, signOut, onAuthStateChanged } from 'firebase/auth'
 import { collection, doc, getDoc, setDoc, getDocs, query, where } from 'firebase/firestore'
 import QRCode from 'qrcode'
 
-// Styles for Friendly Social UI
+// Mobile-first styles for Friendly Social UI
 const styles = {
   container: {
     minHeight: '100vh',
     backgroundColor: '#fff5f5',
-    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+    paddingBottom: '80px' // Space for fixed nav on mobile
   },
   header: {
     backgroundColor: 'white',
-    padding: '20px',
+    padding: '16px',
     boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
-    position: 'sticky',
+    position: 'fixed',
     top: 0,
+    left: 0,
+    right: 0,
     zIndex: 100
   },
   logoSection: {
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: '15px'
+    justifyContent: 'space-between'
   },
   logo: {
-    fontSize: '24px',
+    fontSize: '20px',
     fontWeight: 'bold',
     color: '#e53e3e',
     display: 'flex',
     alignItems: 'center',
-    gap: '8px'
+    gap: '6px'
   },
   userInfo: {
     display: 'flex',
     alignItems: 'center',
-    gap: '15px'
+    gap: '10px'
   },
   userEmail: {
-    fontSize: '14px',
-    color: '#666'
+    fontSize: '12px',
+    color: '#666',
+    maxWidth: '120px',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap'
   },
   signOutBtn: {
     background: '#fff0f0',
     color: '#e53e3e',
     border: 'none',
-    padding: '8px 16px',
-    borderRadius: '20px',
-    fontSize: '14px',
+    padding: '6px 12px',
+    borderRadius: '16px',
+    fontSize: '12px',
     cursor: 'pointer',
-    transition: 'all 0.2s',
-    '&:hover': {
-      background: '#ffe5e5'
-    }
+    transition: 'all 0.2s'
   },
-  navPills: {
+  mobileNav: {
+    position: 'fixed',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: 'white',
+    boxShadow: '0 -2px 10px rgba(0,0,0,0.1)',
     display: 'flex',
-    gap: '10px',
-    overflowX: 'auto',
-    paddingBottom: '5px'
+    justifyContent: 'space-around',
+    padding: '8px 0',
+    zIndex: 100
   },
-  navPill: {
-    padding: '10px 24px',
-    background: '#fff0f0',
+  mobileNavItem: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    padding: '8px 16px',
+    background: 'none',
     border: 'none',
-    borderRadius: '25px',
-    fontSize: '15px',
+    color: '#666',
+    fontSize: '11px',
     cursor: 'pointer',
-    color: '#e53e3e',
-    whiteSpace: 'nowrap',
-    transition: 'all 0.2s',
-    fontWeight: '500'
+    transition: 'all 0.2s'
   },
-  navPillActive: {
-    background: '#e53e3e',
-    color: 'white'
+  mobileNavItemActive: {
+    color: '#e53e3e'
+  },
+  mobileNavIcon: {
+    fontSize: '24px',
+    marginBottom: '4px'
   },
   content: {
-    padding: '20px',
+    padding: '80px 16px 16px', // Top padding for fixed header
     maxWidth: '600px',
     margin: '0 auto'
   },
   welcomeCard: {
     background: 'white',
-    padding: '40px 30px',
-    borderRadius: '25px',
+    padding: '32px 24px',
+    borderRadius: '20px',
     textAlign: 'center',
-    boxShadow: '0 5px 20px rgba(0,0,0,0.08)',
-    marginTop: '20px'
+    boxShadow: '0 4px 15px rgba(0,0,0,0.08)',
+    marginTop: '16px'
   },
   welcomeEmoji: {
-    fontSize: '64px',
-    marginBottom: '20px'
+    fontSize: '48px',
+    marginBottom: '16px'
   },
   welcomeTitle: {
-    fontSize: '32px',
+    fontSize: '24px',
     fontWeight: 'bold',
     color: '#333',
-    marginBottom: '10px'
+    marginBottom: '8px',
+    lineHeight: '1.2'
   },
   welcomeSubtitle: {
-    fontSize: '18px',
+    fontSize: '16px',
     color: '#666',
-    marginBottom: '30px'
+    marginBottom: '24px',
+    lineHeight: '1.5'
   },
   primaryBtn: {
     background: '#e53e3e',
     color: 'white',
     border: 'none',
-    padding: '16px 40px',
-    borderRadius: '30px',
+    padding: '14px 28px',
+    borderRadius: '25px',
     fontSize: '16px',
     fontWeight: '600',
     cursor: 'pointer',
@@ -119,77 +133,86 @@ const styles = {
     display: 'inline-flex',
     alignItems: 'center',
     gap: '8px',
-    '&:hover': {
-      background: '#d63333',
-      transform: 'translateY(-2px)'
-    }
+    width: '100%',
+    justifyContent: 'center'
   },
   profileCard: {
     background: 'white',
-    padding: '30px',
-    borderRadius: '25px',
-    boxShadow: '0 5px 20px rgba(0,0,0,0.08)',
-    marginBottom: '20px'
+    padding: '24px',
+    borderRadius: '20px',
+    boxShadow: '0 4px 15px rgba(0,0,0,0.08)',
+    marginBottom: '16px'
   },
   avatar: {
-    width: '120px',
-    height: '120px',
+    width: '80px',
+    height: '80px',
     background: 'linear-gradient(135deg, #ff6b6b, #feca57)',
-    borderRadius: '60px',
-    margin: '0 auto 20px',
+    borderRadius: '40px',
+    margin: '0 auto 16px',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    fontSize: '48px',
+    fontSize: '32px',
     color: 'white',
     fontWeight: 'bold'
   },
   profileName: {
-    fontSize: '28px',
+    fontSize: '24px',
     fontWeight: 'bold',
     color: '#333',
     textAlign: 'center',
-    marginBottom: '8px'
+    marginBottom: '6px'
   },
   profileStatus: {
-    fontSize: '16px',
+    fontSize: '14px',
     color: '#666',
     textAlign: 'center',
-    marginBottom: '20px'
+    marginBottom: '16px'
   },
   skillBadges: {
     display: 'flex',
-    gap: '10px',
+    gap: '8px',
     justifyContent: 'center',
     flexWrap: 'wrap',
-    marginBottom: '20px'
+    marginBottom: '16px'
   },
   badge: {
-    padding: '8px 20px',
+    padding: '6px 16px',
     background: '#fff0f0',
     color: '#e53e3e',
-    borderRadius: '20px',
-    fontSize: '14px',
+    borderRadius: '16px',
+    fontSize: '13px',
     fontWeight: '500'
   },
   quickStats: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(3, 1fr)',
-    gap: '15px',
-    marginTop: '25px'
+    gridTemplateColumns: '1fr',
+    gap: '12px',
+    marginTop: '20px'
   },
   quickStat: {
     background: '#f8f8f8',
-    padding: '20px',
-    borderRadius: '16px',
-    textAlign: 'center'
+    padding: '16px',
+    borderRadius: '12px',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px'
   },
   statIcon: {
-    fontSize: '24px',
-    marginBottom: '5px'
+    fontSize: '20px',
+    width: '40px',
+    height: '40px',
+    background: '#fff0f0',
+    borderRadius: '20px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  statContent: {
+    flex: 1
   },
   statValue: {
-    fontSize: '16px',
+    fontSize: '14px',
     fontWeight: '600',
     color: '#333',
     marginBottom: '2px'
@@ -200,152 +223,150 @@ const styles = {
   },
   formCard: {
     background: 'white',
-    padding: '30px',
-    borderRadius: '25px',
-    boxShadow: '0 5px 20px rgba(0,0,0,0.08)'
+    padding: '24px',
+    borderRadius: '20px',
+    boxShadow: '0 4px 15px rgba(0,0,0,0.08)'
   },
   formTitle: {
-    fontSize: '24px',
+    fontSize: '20px',
     fontWeight: 'bold',
     color: '#333',
-    marginBottom: '25px',
+    marginBottom: '20px',
     textAlign: 'center'
   },
   inputGroup: {
-    marginBottom: '20px'
+    marginBottom: '16px'
   },
   label: {
     display: 'block',
-    marginBottom: '8px',
+    marginBottom: '6px',
     fontWeight: '500',
     color: '#333',
-    fontSize: '15px'
+    fontSize: '14px'
   },
   input: {
     width: '100%',
-    padding: '14px 18px',
+    padding: '12px 16px',
     border: '2px solid #f0f0f0',
-    borderRadius: '12px',
+    borderRadius: '10px',
     fontSize: '16px',
     transition: 'border-color 0.2s',
     outline: 'none',
     boxSizing: 'border-box',
-    '&:focus': {
-      borderColor: '#e53e3e'
-    }
+    WebkitAppearance: 'none'
   },
   checkboxGroup: {
-    display: 'flex',
-    gap: '15px',
-    flexWrap: 'wrap'
+    display: 'grid',
+    gridTemplateColumns: '1fr 1fr',
+    gap: '10px'
   },
   checkboxLabel: {
     display: 'flex',
     alignItems: 'center',
     gap: '8px',
-    padding: '10px 16px',
+    padding: '10px 12px',
     background: '#f8f8f8',
-    borderRadius: '10px',
+    borderRadius: '8px',
     cursor: 'pointer',
-    transition: 'all 0.2s'
+    transition: 'all 0.2s',
+    fontSize: '14px'
   },
   checkbox: {
-    width: '18px',
-    height: '18px',
+    width: '16px',
+    height: '16px',
     cursor: 'pointer'
   },
   qrSection: {
     background: 'white',
-    padding: '30px',
-    borderRadius: '25px',
+    padding: '24px',
+    borderRadius: '20px',
     textAlign: 'center',
-    boxShadow: '0 5px 20px rgba(0,0,0,0.08)',
-    marginBottom: '20px'
+    boxShadow: '0 4px 15px rgba(0,0,0,0.08)',
+    marginBottom: '16px'
   },
   qrTitle: {
-    fontSize: '20px',
+    fontSize: '18px',
     fontWeight: 'bold',
     color: '#333',
-    marginBottom: '20px'
+    marginBottom: '16px'
   },
   urlBox: {
     background: '#f8f8f8',
-    padding: '15px',
-    borderRadius: '12px',
-    marginBottom: '20px',
+    padding: '12px',
+    borderRadius: '10px',
+    marginBottom: '16px',
     wordBreak: 'break-all',
-    fontSize: '14px',
+    fontSize: '12px',
     color: '#666'
   },
   connectionsList: {
     display: 'grid',
-    gap: '15px'
+    gap: '12px'
   },
   connectionCard: {
     background: 'white',
-    padding: '20px',
-    borderRadius: '20px',
-    boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
+    padding: '16px',
+    borderRadius: '16px',
+    boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
     cursor: 'pointer',
-    transition: 'all 0.2s',
-    '&:hover': {
-      transform: 'translateY(-2px)',
-      boxShadow: '0 5px 20px rgba(0,0,0,0.1)'
-    }
+    transition: 'all 0.2s'
   },
   connectionInfo: {
     display: 'flex',
     alignItems: 'center',
-    gap: '15px'
+    gap: '12px'
   },
   connectionAvatar: {
-    width: '50px',
-    height: '50px',
+    width: '40px',
+    height: '40px',
     background: 'linear-gradient(135deg, #ff6b6b, #feca57)',
-    borderRadius: '25px',
+    borderRadius: '20px',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     color: 'white',
-    fontWeight: 'bold'
+    fontWeight: 'bold',
+    fontSize: '16px'
   },
   connectionName: {
-    fontSize: '16px',
+    fontSize: '15px',
     fontWeight: '600',
     color: '#333',
     marginBottom: '2px'
   },
   connectionDetail: {
-    fontSize: '14px',
+    fontSize: '12px',
     color: '#666'
   },
   emptyState: {
     background: 'white',
-    padding: '60px 30px',
-    borderRadius: '25px',
+    padding: '48px 24px',
+    borderRadius: '20px',
     textAlign: 'center',
-    boxShadow: '0 5px 20px rgba(0,0,0,0.08)'
+    boxShadow: '0 4px 15px rgba(0,0,0,0.08)'
   },
   emptyStateIcon: {
-    fontSize: '64px',
-    marginBottom: '20px'
+    fontSize: '48px',
+    marginBottom: '16px'
   },
   googleButton: {
     background: '#4285f4',
     color: 'white',
     border: 'none',
-    padding: '16px 40px',
-    borderRadius: '30px',
+    padding: '14px 28px',
+    borderRadius: '25px',
     fontSize: '16px',
     fontWeight: '600',
     cursor: 'pointer',
     transition: 'all 0.2s',
     display: 'inline-flex',
     alignItems: 'center',
-    gap: '8px'
+    gap: '8px',
+    width: '100%',
+    justifyContent: 'center'
   }
 }
 
@@ -389,7 +410,6 @@ function PlayerProfile() {
     }
     
     try {
-      // First get the current user's profile data
       const currentUserDoc = await getDoc(doc(db, 'players', currentUser.uid))
       
       if (!currentUserDoc.exists()) {
@@ -400,7 +420,6 @@ function PlayerProfile() {
       
       const currentUserData = currentUserDoc.data()
       
-      // Save connection for current user
       await setDoc(doc(collection(db, 'connections')), {
         userId: currentUser.uid,
         connectedToId: playerId,
@@ -409,7 +428,6 @@ function PlayerProfile() {
         connectedAt: new Date().toISOString()
       })
       
-      // Save reverse connection for the other player
       await setDoc(doc(collection(db, 'connections')), {
         userId: playerId,
         connectedToId: currentUser.uid,
@@ -431,7 +449,7 @@ function PlayerProfile() {
 
   return (
     <div style={styles.container}>
-      <div style={{padding: '20px', maxWidth: '600px', margin: '0 auto'}}>
+      <div style={{padding: '16px', paddingTop: '80px', maxWidth: '600px', margin: '0 auto'}}>
         <div style={styles.profileCard}>
           <div style={styles.avatar}>
             {player.name.split(' ').map(n => n[0]).join('')}
@@ -449,21 +467,23 @@ function PlayerProfile() {
           <div style={styles.quickStats}>
             <div style={styles.quickStat}>
               <div style={styles.statIcon}>📍</div>
-              <div style={styles.statLabel}>{player.playLocations}</div>
+              <div style={styles.statContent}>
+                <div style={styles.statValue}>{player.playLocations}</div>
+                <div style={styles.statLabel}>Courts</div>
+              </div>
             </div>
             <div style={styles.quickStat}>
               <div style={styles.statIcon}>⏰</div>
-              <div style={styles.statLabel}>{player.playTimes?.join(', ')}</div>
-            </div>
-            <div style={styles.quickStat}>
-              <div style={styles.statIcon}>🎯</div>
-              <div style={styles.statLabel}>DUPR {player.dupr}</div>
+              <div style={styles.statContent}>
+                <div style={styles.statValue}>{player.playTimes?.join(', ')}</div>
+                <div style={styles.statLabel}>Available Times</div>
+              </div>
             </div>
           </div>
 
           {currentUser && playerId !== currentUser.uid && (
             <button 
-              style={{...styles.primaryBtn, width: '100%', marginTop: '25px', justifyContent: 'center'}}
+              style={{...styles.primaryBtn, marginTop: '20px'}}
               onClick={handleConnect}
             >
               Connect with {player.name.split(' ')[0]} 🤝
@@ -472,7 +492,7 @@ function PlayerProfile() {
           
           {!currentUser && (
             <button 
-              style={{...styles.googleButton, width: '100%', marginTop: '25px', justifyContent: 'center'}}
+              style={{...styles.googleButton, marginTop: '20px'}}
               onClick={() => signInWithPopup(auth, googleProvider)}
             >
               Sign in to Connect 🔐
@@ -484,9 +504,7 @@ function PlayerProfile() {
               ...styles.primaryBtn, 
               background: '#f0f0f0', 
               color: '#666',
-              width: '100%', 
-              marginTop: '10px',
-              justifyContent: 'center'
+              marginTop: '10px'
             }}
             onClick={() => window.location.href = '/'}
           >
@@ -516,7 +534,6 @@ function MainApp() {
   const [initializing, setInitializing] = useState(true)
   const [qrCodeUrl, setQrCodeUrl] = useState('')
 
-  // Check if user is logged in
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setUser(user)
@@ -529,7 +546,6 @@ function MainApp() {
     return unsubscribe
   }, [])
 
-  // Generate QR code when profile loads
   useEffect(() => {
     if (user && savedProfileId) {
       const profileUrl = `${window.location.origin}/player/${user.uid}`
@@ -665,37 +681,6 @@ function MainApp() {
             </div>
           )}
         </div>
-        
-        {user && (
-          <div style={styles.navPills}>
-            <button 
-              style={{...styles.navPill, ...(currentPage === 'home' ? styles.navPillActive : {})}}
-              onClick={() => setCurrentPage('home')}
-            >
-              🏠 Home
-            </button>
-            <button 
-              style={{...styles.navPill, ...(currentPage === 'profile' ? styles.navPillActive : {})}}
-              onClick={() => setCurrentPage('profile')}
-            >
-              ✏️ {savedProfileId ? 'Edit Profile' : 'Create Profile'}
-            </button>
-            {savedProfileId && (
-              <button 
-                style={{...styles.navPill, ...(currentPage === 'view-profile' ? styles.navPillActive : {})}}
-                onClick={() => setCurrentPage('view-profile')}
-              >
-                👤 My Profile
-              </button>
-            )}
-            <button 
-              style={{...styles.navPill, ...(currentPage === 'connections' ? styles.navPillActive : {})}}
-              onClick={() => setCurrentPage('connections')}
-            >
-              👥 Connections
-            </button>
-          </div>
-        )}
       </div>
 
       <div style={styles.content}>
@@ -704,8 +689,7 @@ function MainApp() {
             <div style={styles.welcomeEmoji}>🎾</div>
             <h1 style={styles.welcomeTitle}>Welcome to Pickle Connect!</h1>
             <p style={styles.welcomeSubtitle}>
-              Share your player profile instantly with NFC tags or QR codes. 
-              Connect with players, find your perfect match!
+              Share your player profile instantly with NFC tags or QR codes.
             </p>
             {!user ? (
               <button style={styles.googleButton} onClick={handleGoogleSignIn}>
@@ -824,6 +808,7 @@ function MainApp() {
                 </label>
                 <label style={{
                   ...styles.checkboxLabel,
+                  gridColumn: 'span 2',
                   background: profile.playTimes.includes('night') ? '#fff0f0' : '#f8f8f8',
                   color: profile.playTimes.includes('night') ? '#e53e3e' : '#666'
                 }}>
@@ -846,13 +831,13 @@ function MainApp() {
                 name="playLocations"
                 value={profile.playLocations}
                 onChange={handleInputChange}
-                placeholder="Central Park Courts, Riverside Courts"
+                placeholder="Central Park Courts"
                 required
               />
             </div>
 
             <button 
-              style={{...styles.primaryBtn, width: '100%', justifyContent: 'center'}} 
+              style={styles.primaryBtn} 
               type="submit" 
               disabled={loading}
             >
@@ -880,18 +865,24 @@ function MainApp() {
               <div style={styles.quickStats}>
                 <div style={styles.quickStat}>
                   <div style={styles.statIcon}>📍</div>
-                  <div style={styles.statValue}>{profile.playLocations.split(',')[0]}</div>
-                  <div style={styles.statLabel}>Main Court</div>
+                  <div style={styles.statContent}>
+                    <div style={styles.statValue}>{profile.playLocations}</div>
+                    <div style={styles.statLabel}>Courts</div>
+                  </div>
                 </div>
                 <div style={styles.quickStat}>
                   <div style={styles.statIcon}>📱</div>
-                  <div style={styles.statValue}>{profile.phone}</div>
-                  <div style={styles.statLabel}>Phone</div>
+                  <div style={styles.statContent}>
+                    <div style={styles.statValue}>{profile.phone}</div>
+                    <div style={styles.statLabel}>Phone</div>
+                  </div>
                 </div>
                 <div style={styles.quickStat}>
                   <div style={styles.statIcon}>✉️</div>
-                  <div style={styles.statValue}>Contact</div>
-                  <div style={styles.statLabel}>{profile.email}</div>
+                  <div style={styles.statContent}>
+                    <div style={styles.statValue}>{profile.email}</div>
+                    <div style={styles.statLabel}>Email</div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -906,10 +897,10 @@ function MainApp() {
                   <img 
                     src={qrCodeUrl} 
                     alt="Profile QR Code" 
-                    style={{width: '200px', height: '200px', borderRadius: '12px'}} 
+                    style={{width: '160px', height: '160px', borderRadius: '12px'}} 
                   />
-                  <p style={{fontSize: '14px', color: '#666', marginTop: '15px'}}>
-                    Scan this QR code or tap an NFC tag to share your profile instantly! ✨
+                  <p style={{fontSize: '13px', color: '#666', marginTop: '12px'}}>
+                    Scan or tap NFC tag to share! ✨
                   </p>
                 </div>
               )}
@@ -919,15 +910,15 @@ function MainApp() {
 
         {currentPage === 'connections' && user && (
           <div>
-            <h2 style={{fontSize: '28px', fontWeight: 'bold', marginBottom: '20px', textAlign: 'center'}}>
+            <h2 style={{fontSize: '24px', fontWeight: 'bold', marginBottom: '16px', textAlign: 'center'}}>
               Your Pickleball Friends 👥
             </h2>
             {connections.length === 0 ? (
               <div style={styles.emptyState}>
                 <div style={styles.emptyStateIcon}>🤔</div>
-                <h3 style={{fontSize: '20px', marginBottom: '10px'}}>No connections yet!</h3>
-                <p style={{color: '#666'}}>
-                  Tap NFC tags or scan QR codes to connect with other players
+                <h3 style={{fontSize: '18px', marginBottom: '8px'}}>No connections yet!</h3>
+                <p style={{color: '#666', fontSize: '14px'}}>
+                  Tap NFC tags or scan QR codes to connect
                 </p>
               </div>
             ) : (
@@ -945,11 +936,11 @@ function MainApp() {
                       <div>
                         <div style={styles.connectionName}>{conn.connectedToName}</div>
                         <div style={styles.connectionDetail}>
-                          DUPR {conn.connectedToDupr} • Connected {new Date(conn.connectedAt).toLocaleDateString()}
+                          DUPR {conn.connectedToDupr} • {new Date(conn.connectedAt).toLocaleDateString()}
                         </div>
                       </div>
                     </div>
-                    <div style={{fontSize: '20px'}}>→</div>
+                    <div style={{fontSize: '18px', color: '#e53e3e'}}>→</div>
                   </div>
                 ))}
               </div>
@@ -957,6 +948,53 @@ function MainApp() {
           </div>
         )}
       </div>
+
+      {user && (
+        <nav style={styles.mobileNav}>
+          <button 
+            style={{
+              ...styles.mobileNavItem,
+              ...(currentPage === 'home' ? styles.mobileNavItemActive : {})
+            }}
+            onClick={() => setCurrentPage('home')}
+          >
+            <span style={styles.mobileNavIcon}>🏠</span>
+            <span>Home</span>
+          </button>
+          <button 
+            style={{
+              ...styles.mobileNavItem,
+              ...(currentPage === 'profile' ? styles.mobileNavItemActive : {})
+            }}
+            onClick={() => setCurrentPage('profile')}
+          >
+            <span style={styles.mobileNavIcon}>✏️</span>
+            <span>Edit</span>
+          </button>
+          {savedProfileId && (
+            <button 
+              style={{
+                ...styles.mobileNavItem,
+                ...(currentPage === 'view-profile' ? styles.mobileNavItemActive : {})
+              }}
+              onClick={() => setCurrentPage('view-profile')}
+            >
+              <span style={styles.mobileNavIcon}>👤</span>
+              <span>Profile</span>
+            </button>
+          )}
+          <button 
+            style={{
+              ...styles.mobileNavItem,
+              ...(currentPage === 'connections' ? styles.mobileNavItemActive : {})
+            }}
+            onClick={() => setCurrentPage('connections')}
+          >
+            <span style={styles.mobileNavIcon}>👥</span>
+            <span>Friends</span>
+          </button>
+        </nav>
+      )}
     </div>
   )
 }
