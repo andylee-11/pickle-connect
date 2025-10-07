@@ -132,7 +132,15 @@ function PlayerProfile() {
       )}
       
       {!currentUser && (
-        <button style={styles.googleButton} onClick={() => signInWithPopup(auth, googleProvider)}>
+        <button style={styles.googleButton} onClick={async () => {
+          try {
+            const result = await signInWithPopup(auth, googleProvider)
+            // After signing in, redirect to home to create profile
+            window.location.href = '/'
+          } catch (error) {
+            console.error('Error signing in:', error)
+          }
+        }}>
           Sign in to Connect
         </button>
       )}
