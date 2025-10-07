@@ -542,7 +542,7 @@ function MainApp() {
               style={styles.input}
               type="email"
               name="email"
-              value={profile.email}
+              value={profile.email || user?.email || ''}
               onChange={handleInputChange}
               required
               disabled
