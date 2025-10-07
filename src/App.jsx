@@ -607,6 +607,14 @@ function MainApp() {
             <strong>Your NFC URL:</strong><br/>
             {window.location.origin}/player/{user.uid}
           </div>
+          {qrCodeUrl && (
+            <div style={{textAlign: 'center', marginTop: '20px'}}>
+              <img src={qrCodeUrl} alt="Profile QR Code" style={{width: '200px', height: '200px'}} />
+              <p style={{fontSize: '14px', color: '#6b7280', marginTop: '10px'}}>
+                Scan this QR code to share your profile
+              </p>
+            </div>
+          )}
           
           <p style={{marginTop: '20px', fontSize: '14px', color: '#6b7280'}}>
             Write this URL to your NFC tag or paddle sticker!
