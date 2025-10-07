@@ -46,7 +46,9 @@ const styles = {
     display: 'flex',
     justifyContent: 'space-around',
     padding: '8px 0',
-    zIndex: 100
+    zIndex: 100, 
+    borderRadius: 50,
+    margin: 10
   },
   mobileNavItem: {
     display: 'flex',
