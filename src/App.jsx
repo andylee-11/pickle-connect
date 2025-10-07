@@ -609,9 +609,16 @@ function MainApp() {
             <p>No connections yet. Tap NFC tags to connect with other players!</p>
           ) : (
             connections.map((conn, index) => (
-              <div key={index} style={styles.connectionCard}>
+              <div 
+                key={index} 
+                style={{...styles.connectionCard, cursor: 'pointer'}}
+                onClick={() => window.location.href = `/player/${conn.connectedToId}`}
+              >
                 <strong>{conn.connectedToName}</strong> - DUPR: {conn.connectedToDupr}<br/>
                 <small>Connected: {new Date(conn.connectedAt).toLocaleDateString()}</small>
+                <div style={{marginTop: '5px', color: '#3b82f6', fontSize: '14px'}}>
+                  View Profile →
+                </div>
               </div>
             ))
           )}
