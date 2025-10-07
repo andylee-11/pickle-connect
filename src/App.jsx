@@ -146,6 +146,8 @@ function MainApp() {
       setUser(user)
       if (user) {
         await checkUserProfile(user.uid)
+        await loadConnections() // Add this line
+
       }
       setInitializing(false)
     })
@@ -169,6 +171,18 @@ function MainApp() {
       }
     } catch (error) {
       console.error('Error checking profile:', error)
+    }
+  }
+
+  const loadConnections = async (userId) => {
+    if (!userId) return
+    try {
+      const connectionsQuery = query(collection(db, 'connections'), where('userId', '==', userId))
+      const connectionsSnap = await getDocs(connectionsQuery)
+      const userConnections = connectionsSnap.docs.map(doc => doc.data())
+      setConnections(userConnections)
+    } catch (error) {
+      console.error('Error loading connections:', error)
     }
   }
 
