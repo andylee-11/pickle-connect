@@ -44,6 +44,18 @@ function PlayerProfile() {
     }
     
     try {
+      // First get the current user's profile data
+      const currentUserDoc = await getDoc(doc(db, 'players', currentUser.uid))
+      
+      if (!currentUserDoc.exists()) {
+        alert('Please create your profile first!')
+        navigate('/')
+        return
+      }
+      
+      const currentUserData = currentUserDoc.data()
+      
+      // Save connection for current user
       await setDoc(doc(collection(db, 'connections')), {
         userId: currentUser.uid,
         connectedToId: playerId,
@@ -52,10 +64,20 @@ function PlayerProfile() {
         connectedAt: new Date().toISOString()
       })
       
+      // Save reverse connection for the other player
+      await setDoc(doc(collection(db, 'connections')), {
+        userId: playerId,
+        connectedToId: currentUser.uid,
+        connectedToName: currentUserData.name,
+        connectedToDupr: currentUserData.dupr,
+        connectedAt: new Date().toISOString()
+      })
+      
       alert(`Connected with ${player.name}!`)
-      navigate('/')
+      window.location.href = '/'
     } catch (error) {
       console.error('Error saving connection:', error)
+      alert('Error connecting. Please try again.')
     }
   }
 
