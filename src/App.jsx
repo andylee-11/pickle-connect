@@ -3,6 +3,7 @@ import { useParams, useNavigate, Routes, Route } from 'react-router-dom'
 import { auth, googleProvider, db } from './firebase'
 import { signInWithPopup, signOut, onAuthStateChanged } from 'firebase/auth'
 import { collection, doc, getDoc, setDoc, getDocs, query, where } from 'firebase/firestore'
+import QRCode from 'qrcode'
 
 function PlayerProfile() {
   const { playerId } = useParams()
@@ -162,6 +163,8 @@ function MainApp() {
   const [connections, setConnections] = useState([])
   const [loading, setLoading] = useState(false)
   const [initializing, setInitializing] = useState(true)
+  const [qrCodeUrl, setQrCodeUrl] = useState('')
+
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -175,6 +178,15 @@ function MainApp() {
     })
     return unsubscribe
   }, [])
+
+  useEffect(() => {
+    if (user && savedProfileId) {
+      const profileUrl = `${window.location.origin}/player/${user.uid}`
+      QRCode.toDataURL(profileUrl)
+        .then(url => setQrCodeUrl(url))
+        .catch(err => console.error('Error generating QR code:', err))
+    }
+  }, [user, savedProfileId])
 
   const checkUserProfile = async (userId) => {
     try {
