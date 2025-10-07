@@ -607,7 +607,7 @@ function MainApp() {
           <p><strong>Name:</strong> {profile.name}</p>
           <p><strong>DUPR Rating:</strong> {profile.dupr}</p>
           <p><strong>Phone:</strong> {profile.phone}</p>
-          <p><strong>Email:</strong> {profile.email}</p>
+          <p><strong>Email:</strong> {profile.email || user.email}</p>  {/* Add this line */}
           <p><strong>Play Times:</strong> {profile.playTimes.join(', ')}</p>
           <p><strong>Locations:</strong> {profile.playLocations}</p>
           
