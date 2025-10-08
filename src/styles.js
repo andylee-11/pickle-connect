@@ -179,7 +179,8 @@ export const styles = {
     alignItems: 'center',
     gap: '8px',
     width: '100%',
-    justifyContent: 'center'
+    justifyContent: 'center', 
+    fontFamily: 'inherit'
   },
   button: {
     backgroundColor: '#10b981',
