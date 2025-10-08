@@ -31,9 +31,6 @@ function Onboarding({ onComplete, connectToPlayer }) {
 
   const handleGoogleSignIn = async () => {
     try {
-      // Clear any existing auth state
-      await auth.signOut();
-
       // Force account selection
       googleProvider.setCustomParameters({
         prompt: 'select_account'
