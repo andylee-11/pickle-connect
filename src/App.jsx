@@ -411,6 +411,20 @@ function Onboarding({ onComplete, connectToPlayer }) {
           // They came from a player profile, need to make connection
           try {
             const currentUserData = docSnap.data()
+
+            // Check if connection already exists
+            const existingConnectionQuery = query(
+              collection(db, 'connections'), 
+              where('userId', '==', googleUser.uid),
+              where('connectedToId', '==', connectToPlayer)
+            )
+            const existingConnection = await getDocs(existingConnectionQuery)
+
+            if (!existingConnection.empty) {
+              alert('You are already connected with this player!')
+              onComplete()
+              return
+            }
             
             // Get the player they want to connect with
             const targetPlayerDoc = await getDoc(doc(db, 'players', connectToPlayer))
@@ -487,6 +501,21 @@ function Onboarding({ onComplete, connectToPlayer }) {
       // If they came from a player profile, create connection after profile creation
       if (connectToPlayer) {
         try {
+
+          // Check if connection already exists
+          const existingConnectionQuery = query(
+            collection(db, 'connections'), 
+            where('userId', '==', user.uid),
+            where('connectedToId', '==', connectToPlayer)
+          )
+          const existingConnection = await getDocs(existingConnectionQuery)
+
+          if (!existingConnection.empty) {
+            alert('You are already connected with this player!')
+            onComplete()
+            return
+          }
+
           const targetPlayerDoc = await getDoc(doc(db, 'players', connectToPlayer))
           if (targetPlayerDoc.exists()) {
             const targetPlayerData = targetPlayerDoc.data()
@@ -724,6 +753,20 @@ function PlayerProfile() {
         return
       }
       
+      // Check if connection already exists
+      const existingConnectionQuery = query(
+        collection(db, 'connections'), 
+        where('userId', '==', currentUser.uid),
+        where('connectedToId', '==', playerId)
+      )
+      const existingConnection = await getDocs(existingConnectionQuery)
+
+      if (!existingConnection.empty) {
+        alert('You are already connected with this player!')
+        window.location.href = '/'
+        return
+      }
+
       const currentUserData = currentUserDoc.data()
       
       await setDoc(doc(collection(db, 'connections')), {
