@@ -4,377 +4,14 @@ import { auth, googleProvider, db } from './firebase'
 import { signInWithPopup, signOut, onAuthStateChanged } from 'firebase/auth'
 import { collection, doc, getDoc, setDoc, getDocs, query, where } from 'firebase/firestore'
 import QRCode from 'qrcode'
-
-// Mobile-first styles for Friendly Social UI
-const styles = {
-  container: {
-    minHeight: '100vh',
-    backgroundColor: '#fff5f5',
-    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-    paddingBottom: '80px'
-  },
-  header: {
-    backgroundColor: 'white',
-    padding: '16px',
-    boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    right: 0,
-    zIndex: 100
-  },
-  logoSection: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  logo: {
-    fontSize: '20px',
-    fontWeight: 'bold',
-    color: '#e53e3e',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '6px'
-  },
-  mobileNav: {
-    position: 'fixed',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: 'white',
-    boxShadow: '0 -2px 10px rgba(0,0,0,0.1)',
-    display: 'flex',
-    justifyContent: 'space-around',
-    padding: '8px 0',
-    zIndex: 100, 
-    borderRadius: 50,
-    margin: 10
-  },
-  mobileNavItem: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    padding: '8px 16px',
-    background: 'none',
-    border: 'none',
-    color: '#666',
-    fontSize: '11px',
-    cursor: 'pointer',
-    transition: 'all 0.2s'
-  },
-  mobileNavItemActive: {
-    color: '#e53e3e'
-  },
-  mobileNavIcon: {
-    fontSize: '24px',
-    marginBottom: '4px'
-  },
-  content: {
-    padding: '80px 16px 16px',
-    maxWidth: '600px',
-    margin: '0 auto'
-  },
-  // Onboarding styles
-  welcomeCard: {
-    background: 'white',
-    padding: '40px 30px',
-    borderRadius: '25px',
-    textAlign: 'center',
-    boxShadow: '0 5px 20px rgba(0,0,0,0.08)',
-    marginTop: '20px'
-  },
-  welcomeEmoji: {
-    fontSize: '64px',
-    marginBottom: '20px'
-  },
-  welcomeTitle: {
-    fontSize: '32px',
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: '10px'
-  },
-  welcomeSubtitle: {
-    fontSize: '18px',
-    color: '#666',
-    marginBottom: '30px'
-  },
-  googleButton: {
-    background: '#4285f4',
-    color: 'white',
-    border: 'none',
-    padding: '16px 40px',
-    borderRadius: '30px',
-    fontSize: '16px',
-    fontWeight: '600',
-    cursor: 'pointer',
-    transition: 'all 0.2s',
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: '8px',
-    width: '100%',
-    justifyContent: 'center'
-  },
-  // Profile creation form styles
-  formCard: {
-    background: 'white',
-    padding: '24px',
-    borderRadius: '20px',
-    boxShadow: '0 4px 15px rgba(0,0,0,0.08)'
-  },
-  formTitle: {
-    fontSize: '24px',
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: '25px',
-    textAlign: 'center'
-  },
-  inputGroup: {
-    marginBottom: '16px'
-  },
-  label: {
-    display: 'block',
-    marginBottom: '6px',
-    fontWeight: '500',
-    color: '#333',
-    fontSize: '14px'
-  },
-  input: {
-    width: '100%',
-    padding: '12px 16px',
-    border: '2px solid #f0f0f0',
-    borderRadius: '10px',
-    fontSize: '16px',
-    transition: 'border-color 0.2s',
-    outline: 'none',
-    boxSizing: 'border-box',
-    WebkitAppearance: 'none'
-  },
-  checkboxGroup: {
-    display: 'grid',
-    gridTemplateColumns: '1fr 1fr',
-    gap: '10px'
-  },
-  checkboxLabel: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-    padding: '10px 12px',
-    background: '#f8f8f8',
-    borderRadius: '8px',
-    cursor: 'pointer',
-    transition: 'all 0.2s',
-    fontSize: '14px'
-  },
-  checkbox: {
-    width: '16px',
-    height: '16px',
-    cursor: 'pointer'
-  },
-  primaryBtn: {
-    background: '#e53e3e',
-    color: 'white',
-    border: 'none',
-    padding: '14px 28px',
-    borderRadius: '30px',
-    fontSize: '16px',
-    fontWeight: '600',
-    cursor: 'pointer',
-    transition: 'all 0.2s',
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: '8px',
-    width: '100%',
-    justifyContent: 'center'
-  },
-  button: {
-    backgroundColor: '#10b981',
-    color: 'white',
-    padding: '12px 24px',
-    border: 'none',
-    borderRadius: '6px',
-    fontSize: '18px',
-    cursor: 'pointer',
-    width: '100%',
-    marginTop: '20px'
-  },
-  // Profile styles
-  profileCard: {
-    background: 'white',
-    padding: '24px',
-    borderRadius: '20px',
-    boxShadow: '0 4px 15px rgba(0,0,0,0.08)',
-    marginBottom: '16px'
-  },
-  avatar: {
-    width: '80px',
-    height: '80px',
-    background: 'linear-gradient(135deg, #ff6b6b, #feca57)',
-    borderRadius: '40px',
-    margin: '0 auto 16px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontSize: '32px',
-    color: 'white',
-    fontWeight: 'bold'
-  },
-  profileName: {
-    fontSize: '24px',
-    fontWeight: 'bold',
-    color: '#333',
-    textAlign: 'center',
-    marginBottom: '6px'
-  },
-  profileStatus: {
-    fontSize: '14px',
-    color: '#666',
-    textAlign: 'center',
-    marginBottom: '16px'
-  },
-  skillBadges: {
-    display: 'flex',
-    gap: '8px',
-    justifyContent: 'center',
-    flexWrap: 'wrap',
-    marginBottom: '16px'
-  },
-  badge: {
-    padding: '6px 16px',
-    background: '#fff0f0',
-    color: '#e53e3e',
-    borderRadius: '16px',
-    fontSize: '13px',
-    fontWeight: '500'
-  },
-  quickStats: {
-    display: 'grid',
-    gridTemplateColumns: '1fr',
-    gap: '12px',
-    marginTop: '20px'
-  },
-  quickStat: {
-    background: '#f8f8f8',
-    padding: '16px',
-    borderRadius: '12px',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '12px'
-  },
-  statIcon: {
-    fontSize: '20px',
-    width: '40px',
-    height: '40px',
-    background: '#fff0f0',
-    borderRadius: '20px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  statContent: {
-    flex: 1
-  },
-  statValue: {
-    fontSize: '14px',
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: '2px'
-  },
-  statLabel: {
-    fontSize: '12px',
-    color: '#666'
-  },
-  qrSection: {
-    background: 'white',
-    padding: '24px',
-    borderRadius: '20px',
-    textAlign: 'center',
-    boxShadow: '0 4px 15px rgba(0,0,0,0.08)',
-    marginBottom: '16px'
-  },
-  qrTitle: {
-    fontSize: '18px',
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: '16px'
-  },
-  urlBox: {
-    background: '#f8f8f8',
-    padding: '12px',
-    borderRadius: '10px',
-    marginBottom: '16px',
-    wordBreak: 'break-all',
-    fontSize: '12px',
-    color: '#666'
-  },
-  signOutSection: {
-    textAlign: 'center',
-    marginTop: '32px',
-    paddingBottom: '20px'
-  },
-  signOutBtn: {
-    background: '#fff0f0',
-    color: '#e53e3e',
-    border: 'none',
-    padding: '10px 24px',
-    borderRadius: '20px',
-    fontSize: '14px',
-    cursor: 'pointer',
-    transition: 'all 0.2s'
-  },
-  connectionsList: {
-    display: 'grid',
-    gap: '12px'
-  },
-  connectionCard: {
-    background: 'white',
-    padding: '16px',
-    borderRadius: '16px',
-    boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    cursor: 'pointer',
-    transition: 'all 0.2s'
-  },
-  connectionInfo: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '12px'
-  },
-  connectionAvatar: {
-    width: '40px',
-    height: '40px',
-    background: 'linear-gradient(135deg, #ff6b6b, #feca57)',
-    borderRadius: '20px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    color: 'white',
-    fontWeight: 'bold',
-    fontSize: '16px'
-  },
-  connectionName: {
-    fontSize: '15px',
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: '2px'
-  },
-  connectionDetail: {
-    fontSize: '12px',
-    color: '#666'
-  },
-  emptyState: {
-    background: 'white',
-    padding: '48px 24px',
-    borderRadius: '20px',
-    textAlign: 'center',
-    boxShadow: '0 4px 15px rgba(0,0,0,0.08)'
-  },
-  emptyStateIcon: {
-    fontSize: '48px',
-    marginBottom: '16px'
-  }
-}
+import { styles } from './styles'
+import ProfileIcon from './assets/icons/profile.svg'
+import EditIcon from './assets/icons/edit.svg'
+import ConnectionIcon from './assets/icons/connection.svg'
+import CourtsIcon from './assets/icons/courts.svg'
+import PhoneIcon from './assets/icons/phone.svg'
+import EmailIcon from './assets/icons/email.svg'
+import LinkIcon from './assets/icons/link.svg'
 
 // Onboarding component
 function Onboarding({ onComplete, connectToPlayer }) {
@@ -823,14 +460,18 @@ function PlayerProfile() {
 
           <div style={styles.quickStats}>
             <div style={styles.quickStat}>
-              <div style={styles.statIcon}>📍</div>
+              <div style={styles.statIcon}>
+                <img src={CourtsIcon} alt="Courts" style={{width: '20px', height: '20px'}} />
+              </div>
               <div style={styles.statContent}>
                 <div style={styles.statValue}>{player.playLocations}</div>
                 <div style={styles.statLabel}>Courts</div>
               </div>
             </div>
             <div style={styles.quickStat}>
-              <div style={styles.statIcon}>⏰</div>
+              <div style={styles.statIcon}>
+                <img src={TimeIcon} alt="Time" style={{width: '20px', height: '20px'}} />
+              </div>
               <div style={styles.statContent}>
                 <div style={styles.statValue}>{player.playTimes?.join(', ')}</div>
                 <div style={styles.statLabel}>Available Times</div>
@@ -1012,6 +653,13 @@ function MainApp() {
     }
   }
 
+  const copyProfileLink = () => {
+    const profileUrl = `${window.location.origin}/player/${user.uid}`
+    navigator.clipboard.writeText(profileUrl)
+      .then(() => alert('Profile link copied!'))
+      .catch(() => alert('Failed to copy link'))
+  }
+
   const handleOnboardingComplete = () => {
     setShowOnboarding(false)
     window.location.reload()
@@ -1055,21 +703,27 @@ function MainApp() {
 
               <div style={styles.quickStats}>
                 <div style={styles.quickStat}>
-                  <div style={styles.statIcon}>📍</div>
+                  <div style={styles.statIcon}>
+                    <img src={CourtsIcon} alt="Courts" style={{width: '20px', height: '20px'}} />
+                  </div>
                   <div style={styles.statContent}>
                     <div style={styles.statValue}>{profile.playLocations}</div>
                     <div style={styles.statLabel}>Courts</div>
                   </div>
                 </div>
                 <div style={styles.quickStat}>
-                  <div style={styles.statIcon}>📱</div>
+                  <div style={styles.statIcon}>
+                    <img src={PhoneIcon} alt="Phone" style={{width: '20px', height: '20px'}} />
+                  </div>
                   <div style={styles.statContent}>
                     <div style={styles.statValue}>{profile.phone || 'Not set'}</div>
                     <div style={styles.statLabel}>Phone</div>
                   </div>
                 </div>
                 <div style={styles.quickStat}>
-                  <div style={styles.statIcon}>✉️</div>
+                  <div style={styles.statIcon}>
+                    <img src={EmailIcon} alt="Email" style={{width: '20px', height: '20px'}} />
+                  </div>
                   <div style={styles.statContent}>
                     <div style={styles.statValue}>{profile.email}</div>
                     <div style={styles.statLabel}>Email</div>
@@ -1079,10 +733,26 @@ function MainApp() {
             </div>
 
             <div style={styles.qrSection}>
-              <h3 style={styles.qrTitle}>Share Your Profile 🔗</h3>
+              <h3 style={styles.qrTitle}>Share Your Profile</h3>
               <div style={styles.urlBox}>
                 {window.location.origin}/player/{user?.uid}
               </div>
+              <button 
+                style={{
+                  background: '#e53e3e',
+                  color: 'white',
+                  border: 'none',
+                  padding: '8px 20px',
+                  borderRadius: '20px',
+                  fontSize: '14px',
+                  cursor: 'pointer',
+                  marginTop: '10px'
+                }}
+                onClick={copyProfileLink}
+              >
+                <img src={LinkIcon} alt="Copy" style={{width: '16px', height: '16px', verticalAlign: 'middle', marginLeft: '4px', marginRight: '4px'}} />
+                Copy Link
+              </button>
               {qrCodeUrl && (
                 <div>
                   <img 
@@ -1108,7 +778,7 @@ function MainApp() {
         {currentPage === 'edit' && (
           <form style={styles.formCard} onSubmit={handleSubmit}>
             <h2 style={{fontSize: '20px', fontWeight: 'bold', marginBottom: '20px', textAlign: 'center'}}>
-              ✏️ Edit Your Profile
+              Edit Your Profile
             </h2>
             
             <div style={styles.inputGroup}>
@@ -1232,7 +902,7 @@ function MainApp() {
               type="submit" 
               disabled={loading}
             >
-              {loading ? 'Saving...' : 'Update Profile 💾'}
+              {loading ? 'Saving...' : 'Update Profile'}
             </button>
           </form>
         )}
@@ -1240,7 +910,7 @@ function MainApp() {
         {currentPage === 'connections' && (
           <div>
             <h2 style={{fontSize: '24px', fontWeight: 'bold', marginBottom: '16px', textAlign: 'center'}}>
-              Your Pickleball Friends 👥
+              Your Pickleball Friends
             </h2>
             {connections.length === 0 ? (
               <div style={styles.emptyState}>
@@ -1287,7 +957,7 @@ function MainApp() {
             }}
             onClick={() => setCurrentPage('profile')}
           >
-            <span style={styles.mobileNavIcon}>👤</span>
+            <img src={ProfileIcon} alt="Profile" style={{width: '24px', height: '24px', marginBottom: '4px'}} />
             <span>Profile</span>
           </button>
           <button 
@@ -1297,7 +967,7 @@ function MainApp() {
             }}
             onClick={() => setCurrentPage('edit')}
           >
-            <span style={styles.mobileNavIcon}>✏️</span>
+            <img src={EditIcon} alt="Edit" style={{width: '24px', height: '24px', marginBottom: '4px'}} />
             <span>Edit</span>
           </button>
           <button 
@@ -1307,8 +977,8 @@ function MainApp() {
             }}
             onClick={() => setCurrentPage('connections')}
           >
-            <span style={styles.mobileNavIcon}>👥</span>
-            <span>Friends</span>
+            <img src={ConnectionIcon} alt="Connection" style={{width: '24px', height: '24px', marginBottom: '4px'}} />
+            <span>Connections</span>
           </button>
         </nav>
       )}
