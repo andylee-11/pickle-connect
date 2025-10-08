@@ -3,7 +3,7 @@ export const styles = {
   container: {
     minHeight: '100vh',
     backgroundColor: '#fff5f5',
-    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+    fontFamily: '"Space Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
     paddingBottom: '80px'
   },
   header: {
@@ -53,7 +53,9 @@ export const styles = {
     color: '#666',
     fontSize: '11px',
     cursor: 'pointer',
-    transition: 'all 0.2s'
+    transition: 'all 0.2s',
+    flex: '1 0 0',
+    minWidth: '0'
   },
   mobileNavItemActive: {
     color: '#e53e3e'

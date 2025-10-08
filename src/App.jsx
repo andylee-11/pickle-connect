@@ -12,6 +12,8 @@ import CourtsIcon from './assets/icons/courts.svg'
 import PhoneIcon from './assets/icons/phone.svg'
 import EmailIcon from './assets/icons/email.svg'
 import LinkIcon from './assets/icons/link.svg'
+import TimeIcon from './assets/icons/time.svg'
+
 
 // Onboarding component
 function Onboarding({ onComplete, connectToPlayer }) {
